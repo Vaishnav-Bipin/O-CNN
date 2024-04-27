@@ -1,0 +1,38 @@
+SOLVER:
+  gpu: 3,
+  logdir: logs/g50_1/g50_1
+  run: train
+  max_epoch: 300
+  test_every_epoch: 1
+  step_size: (120,180,240)
+  ckpt_num: 20
+
+DATA:
+  train:
+    distort: True
+    depth: 6
+    angle: (0, 0, 5)      # small rotation along z axis  
+    interval: (1, 1, 1)   
+    scale: 0.25
+    jitter: 0.125
+    location: data/GrabCad50K/GrabCad50K.points
+    filelist: data/GrabCad50K/g50_train_points_list.txt
+    batch_size: 32
+    shuffle: True
+
+  test: 
+    distort: False
+    depth: 6
+    location: data/GrabCad50K/GrabCad50K.points
+    filelist: data/GrabCad50K/g50_test_points_list.txt
+    batch_size: 32
+    shuffle: False
+
+MODEL:
+  name: lenet
+  channel: 3
+  nout: 33
+  depth: 6
+
+LOSS:
+  num_class: 33

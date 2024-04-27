@@ -1,0 +1,116 @@
+DATA:
+  test:
+    adaptive: false
+    angle:
+    - 180
+    - 180
+    - 180
+    batch_size: 32
+    bsphere: sphere
+    center: &id001
+    - -1.0
+    - -1.0
+    - -1.0
+    depth: 5
+    disable: false
+    distort: false
+    filelist: data/GrabCad67L/g67L_test_points_list.txt
+    full_depth: 2
+    in_memory: false
+    interval:
+    - 1
+    - 1
+    - 1
+    jitter: 0.0
+    location: data/GrabCad67L/GrabCad67L.points
+    name: ''
+    node_dis: false
+    node_feat: false
+    normal_axis: ''
+    num_workers: 8
+    offset: 0.016
+    radius: -1.0
+    scale: 0.0
+    shuffle: false
+    split_label: false
+    uniform: false
+  train:
+    adaptive: false
+    angle:
+    - 0
+    - 0
+    - 5
+    batch_size: 32
+    bsphere: sphere
+    center: *id001
+    depth: 5
+    disable: false
+    distort: true
+    filelist: data/GrabCad67L/g67L_train_points_list.txt
+    full_depth: 2
+    in_memory: false
+    interval:
+    - 1
+    - 1
+    - 1
+    jitter: 0.125
+    location: data/GrabCad67L/GrabCad67L.points
+    name: ''
+    node_dis: false
+    node_feat: false
+    normal_axis: ''
+    num_workers: 8
+    offset: 0.016
+    radius: -1.0
+    scale: 0.25
+    shuffle: true
+    split_label: false
+    uniform: false
+LOSS:
+  label_smoothing: 0.0
+  num_class: 33
+  weights:
+  - 1.0
+  - 1.0
+MODEL:
+  bottleneck: 4
+  channel: 3
+  depth: 5
+  depth_out: 5
+  dropout:
+  - 0.0
+  factor: 1
+  full_depth: 2
+  interp: linear
+  name: lenet
+  nempty: false
+  nout: 33
+  resblock_num: 3
+  sync_bn: false
+  upsample: nearest
+  use_checkpoint: false
+SOLVER:
+  alias: ''
+  ckpt: ''
+  ckpt_num: 20
+  dist_url: tcp://localhost:10001
+  eval_epoch: 1
+  gamma: 0.1
+  gpu:
+  - 0
+  logdir: logs/g67L/g67L
+  lr: 0.1
+  lr_power: 0.9
+  lr_type: step
+  max_epoch: 600
+  progress_bar: true
+  run: train
+  step_size:
+  - 120
+  - 180
+  - 240
+  test_every_epoch: 1
+  type: sgd
+  weight_decay: 0.0005
+SYS:
+  cmds: classification.py --config configs/cls_g67L.yaml

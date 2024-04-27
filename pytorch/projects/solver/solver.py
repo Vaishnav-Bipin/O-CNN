@@ -11,6 +11,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 from .sampler import InfSampler, DistributedInfSampler
 
+import numpy as np
+from .acc_measures import *
 
 warnings.filterwarnings("ignore", module="torch.optim.lr_scheduler")
 
@@ -185,6 +187,9 @@ class Solver:
 
     train_tracker = AverageTracker()
     rng = range(len(self.train_loader))
+
+    accu_e = 0
+    n_e = 0
     for it in tqdm(rng, ncols=80, leave=False, disable=self.disable_tqdm):
       self.optimizer.zero_grad()
 
@@ -194,6 +199,12 @@ class Solver:
       batch['epoch'] = epoch
       output = self.train_step(batch)
 
+      accu_b = output['train/accu'].item()
+      n_b = batch['label'].size(dim=0)
+
+      accu_e = (accu_e * n_e + accu_b * n_b) / (n_b + n_e)
+      n_e = n_e + n_b
+
       # backward
       output['train/loss'].backward()
       self.optimizer.step()
@@ -201,26 +212,50 @@ class Solver:
       # track the averaged tensors
       train_tracker.update(output)
 
+    out_str = "train/accu: " + str(accu_e) + "\n"
+    # with open(fn, 'a') as fd:
+    #   fd.write(out_str)
+    # print(out_str) 
+
     # save logs
     if self.world_size > 1:
       train_tracker.average_all_gather()
     if self.is_master:
-      train_tracker.log(epoch, self.summry_writer)
+      train_tracker.log(epoch, self.summry_writer, self.log_file)
 
   def test_epoch(self, epoch):
     self.model.eval()
     test_tracker = AverageTracker()
     rng = range(len(self.test_loader))
+    accu_e = 0
+    n_e = 0
+
+    acc_mat = np.zeros((33, 33))
+
     for it in tqdm(rng, ncols=80, leave=False, disable=self.disable_tqdm):
       # forward
       batch = self.test_iter.next()
       batch['iter_num'] = it
       batch['epoch'] = epoch
       with torch.no_grad():
-        output = self.test_step(batch)
+        output = self.test_step(batch, acc_mat)
 
+        accu_b = output['test/accu'].item()
+        n_b = batch['label'].size(dim=0)
+
+        accu_e = (accu_e * n_e + accu_b * n_b) / (n_b + n_e)
+        n_e = n_e + n_b
       # track the averaged tensors
       test_tracker.update(output)
+      
+    out_str = "test/accu: " + str(accu_e) + "\n"
+    # with open(fn, 'a') as fd:
+    #   fd.write(out_str)
+    # print(out_str) 
+    vers = '67'
+    np.savetxt(f'acc_mat_{vers}.out', acc_mat)
+    acc_avgs = np.array([precision_macavg(acc_mat), recall_macavg(acc_mat), f1_macavg(acc_mat), accuracy_avg(acc_mat)])
+    np.savetxt(f'acc_avgs_{vers}.out', acc_avgs)
 
     if self.world_size > 1:
       test_tracker.average_all_gather()
@@ -296,10 +331,20 @@ class Solver:
     self.configure_log()
     self.load_checkpoint()
 
+    # vers = '67L_e0'
+    # fn = f'logs/g{vers}/g{vers}/g{vers}.out'
+    vers = '34_d7'
+    fn = f'logs/g{vers}/resnet/g{vers}.out'
+
+    self.test_epoch(0, fn)
+
     rng = range(self.start_epoch, self.FLAGS.SOLVER.max_epoch+1)
     for epoch in tqdm(rng, ncols=80, disable=self.disable_tqdm):
       # training epoch
-      self.train_epoch(epoch)
+      with open(fn, 'a') as fd:
+        fd.write('Epoch: ' + str(epoch) + "\n")
+      # print('Epoch: ' + str(epoch))
+      self.train_epoch(epoch, fn)
 
       # update learning rate
       self.scheduler.step()
@@ -312,11 +357,12 @@ class Solver:
         continue
 
       # testing epoch
-      self.test_epoch(epoch)
+      self.test_epoch(epoch, fn)
 
       # checkpoint
       self.save_checkpoint(epoch)
 
+    fd.close()
     # sync and exit
     if self.world_size > 1:
       torch.distributed.barrier()

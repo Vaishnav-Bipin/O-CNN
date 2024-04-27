@@ -360,7 +360,7 @@ bool write_ply(const string& filename, const vector<float>& V, const vector<int>
 
 #else
 #include <iostream>
-#include <happly.h>
+#include "happly.h"
 
 bool read_ply(const string& filename, vector<float>& V, vector<int>& F) {
   std::ifstream infile(filename, std::ios::binary);

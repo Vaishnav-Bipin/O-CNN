@@ -10,7 +10,7 @@ _C = CN()
 # SOLVER related parameters
 _C.SOLVER = CN()
 _C.SOLVER.alias             = ''         # The experiment alias
-_C.SOLVER.gpu               = (0,)       # The gpu ids
+_C.SOLVER.gpu               = (3, )       # The gpu ids
 _C.SOLVER.run               = 'train'    # Choose from train or test
 
 _C.SOLVER.logdir            = 'logs'     # Directory where to write event logs
@@ -90,7 +90,7 @@ _C.MODEL.full_depth         = 2           # The input octree full depth layer
 _C.MODEL.depth_out          = 5           # The output feature depth
 _C.MODEL.channel            = 3           # The input feature channel
 _C.MODEL.factor             = 1           # The factor used to widen the network
-_C.MODEL.nout               = 40          # The output feature channel
+_C.MODEL.nout               = 33          # The output feature channel
 _C.MODEL.resblock_num       = 3           # The resblock number
 _C.MODEL.bottleneck         = 4           # The bottleneck factor of one resblock
 _C.MODEL.dropout            = (0.0,)      # The dropout ratio
@@ -102,7 +102,7 @@ _C.MODEL.use_checkpoint     = False       # Use checkpoint to save memory
 
 # loss related parameters
 _C.LOSS = CN()
-_C.LOSS.num_class           = 40          # The class number for the cross-entropy loss
+_C.LOSS.num_class           = 33          # The class number for the cross-entropy loss
 _C.LOSS.weights             = (1.0, 1.0)  # The weight factors for different losses
 _C.LOSS.label_smoothing     = 0.0         # The factor of label smoothing
 
