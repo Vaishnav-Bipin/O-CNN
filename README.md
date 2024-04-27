@@ -76,3 +76,26 @@ If you use our code or models, please [cite](docs/citation.md) our paper.
 Please contact us (Peng-Shuai Wang wangps@hotmail.com, Yang Liu yangliu@microsoft.com ) 
 if you have any problems about our implementation.  
 
+
+
+### Custom (Vaishnav)
+```
+. anaconda3/bin/activate
+
+cd pytorch/projects
+
+conda create --name pytorch-1.9.0 --file conda_reqs.txt   # make python 3.7.16
+pip install -r pip_reqs.txt
+
+mkdir data
+mkdir data/GrabCad67
+mkdir data/GrabCad34
+mkdir data/GrabCad67L
+mkdir data/GrabCad34L
+
+# ensure PC_files_67, 67L, 34, 34L exists
+
+# populate data using createStructure.py (dirs)
+# populate data using walk_dirs.cpp
+# createStructure.py (rename)
+```
