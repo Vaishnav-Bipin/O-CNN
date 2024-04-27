@@ -96,6 +96,6 @@ mkdir data/GrabCad34L
 # ensure PC_files_67, 67L, 34, 34L exists
 
 # populate data using createStructure.py (dirs)
-# populate data using octree/octree/walk_dirs.cpp
+# populate data using octree/octree/walkdir.cpp
 # createStructure.py (rename)
 ```
